@@ -19,7 +19,8 @@ export default function QuickLinks() {
         <Text style={styles.title}>Appointments</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.linkBox}>
+      <TouchableOpacity style={styles.linkBox}
+        onPress={() => router.push("/bloodRequests")}>
         <BloodTestTubeIcon fill="#0694a2" width={26} height={26} />
         <Text style={styles.title}>Blood Banks</Text>
       </TouchableOpacity>

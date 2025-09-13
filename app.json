@@ -3,6 +3,10 @@
     "name": "CareConnect",
     "slug": "care-connect",
     "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*",
+      "assets/*"
+    ],
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "careconnect",
@@ -16,7 +20,13 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "package": "com.hellonmn.careconnect"
     },
     "web": {
       "bundler": "metro",
@@ -33,16 +43,23 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      "expo-audio",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location for emergency services."
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "assets": [
-      "./assets"
-    ]
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c2b3dfdc-3251-4228-a8ad-fad39c051b98"
+      }
+    }
   }
 }

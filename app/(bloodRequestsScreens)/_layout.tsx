@@ -6,7 +6,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-export default function RootLayout() {
+export default function BloodRequestsLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
@@ -20,8 +20,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DefaultTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="bookAppointment" options={{ headerShown: false}} />
-        <Stack.Screen name="doctorProfile" options={{ headerShown: false}} />
+        <Stack.Screen name="bloodRequests" options={{ headerShown: false}} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

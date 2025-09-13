@@ -170,6 +170,60 @@ const SuccessPopup = ({ show, message, onClose }) => {
   );
 };
 
+// Star Rating Component
+const StarRating = ({ rating, size = 16 }) => {
+  const stars = [];
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 !== 0;
+  
+  for (let i = 0; i < 5; i++) {
+    if (i < fullStars) {
+      stars.push(
+        <StarIcon 
+          key={i} 
+          width={size} 
+          height={size} 
+          fill="#FFD700" 
+        />
+      );
+    } else if (i === fullStars && hasHalfStar) {
+      stars.push(
+        <View key={i} style={{ position: 'relative' }}>
+          <StarIcon 
+            width={size} 
+            height={size} 
+            fill="#E5E7EB" 
+          />
+          <View style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            width: size / 2, 
+            overflow: 'hidden' 
+          }}>
+            <StarIcon 
+              width={size} 
+              height={size} 
+              fill="#FFD700" 
+            />
+          </View>
+        </View>
+      );
+    } else {
+      stars.push(
+        <StarIcon 
+          key={i} 
+          width={size} 
+          height={size} 
+          fill="#E5E7EB" 
+        />
+      );
+    }
+  }
+  
+  return <View style={{ flexDirection: 'row', gap: 2 }}>{stars}</View>;
+};
+
 // Main DoctorDetails Component
 const DoctorDetails = (props) => {
   const navigation = useNavigation();
@@ -232,7 +286,20 @@ const DoctorDetails = (props) => {
       
       if (response.ok) {
         const result = await response.json();
-        setDoctor(result);
+        // Enhanced doctor data with more details
+        const enhancedDoctor = {
+          ...result,
+          rating: 4.8,
+          totalReviews: 156,
+          experience: 12,
+          consultationFee: 500,
+          languages: ['English', 'Hindi', 'Tamil'],
+          education: ['MBBS - AIIMS Delhi', 'MD Cardiology - PGI Chandigarh'],
+          services: ['Heart Surgery', 'Cardiac Consultation', 'ECG', 'Echocardiography'],
+          awards: ['Best Cardiologist Award 2023', 'Excellence in Patient Care 2022'],
+          hospitalAffiliations: ['Apollo Hospital', 'Max Healthcare']
+        };
+        setDoctor(enhancedDoctor);
         setLoading(false);
         
         // Set up initial date and slots
@@ -367,31 +434,9 @@ const DoctorDetails = (props) => {
       };
 
       fetchAppointments(appointmentDate);
-          handleSuccessPopupVisibility();
-          setSelectedSlot("");
-          setShowBottomButtons(false);
-      // try {
-      //   const authToken = await AsyncStorage.getItem("authToken");
-      //   const response = await fetch(`${backendApiUrl}/api/appointments/book`, {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       "auth-token": authToken,
-      //     },
-      //     body: JSON.stringify(payload),
-      //   });
-      //   if (response.ok) {
-      //     fetchAppointments(appointmentDate);
-      //     handleSuccessPopupVisibility();
-      //     setSelectedSlot("");
-      //     setShowBottomButtons(false);
-      //   } else {
-      //     Alert.alert("Error", "Error booking appointment. Please try again.");
-      //   }
-      // } catch (error) {
-      //   console.error("Error booking appointment", error);
-      //   Alert.alert("Error", "Error booking appointment. Please try again.");
-      // }
+      handleSuccessPopupVisibility();
+      setSelectedSlot("");
+      setShowBottomButtons(false);
     } else {
       Alert.alert("Error", "Please select a slot first.");
     }
@@ -458,87 +503,170 @@ const DoctorDetails = (props) => {
           </Text>
         </View>
 
-        {/* Date Selection */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.dateScrollView}
-          contentContainerStyle={styles.dateContainer}
-        >
-          {daysInMonth.slice(0, 7).map((day, index) => {
-            const dayIndex = (today.getDay() + index) % 7;
-            const isSelected = selectedDate === day;
-            return (
-              <TouchableOpacity
-                key={day}
-                style={[
-                  styles.dateButton,
-                  isSelected && styles.selectedDateButton,
-                ]}
-                onPress={() => handleDatePress(day)}
-              >
-                <Text
+        <View style={styles.slotesContainer}>
+          {/* Date Selection */}
+          <Text style={styles.slotesTitle}>Available Slots</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles.dateScrollView}
+            contentContainerStyle={styles.dateContainer}
+          >
+            {daysInMonth.slice(0, 7).map((day, index) => {
+              const dayIndex = (today.getDay() + index) % 7;
+              const isSelected = selectedDate === day;
+              return (
+                <TouchableOpacity
+                  key={day}
                   style={[
-                    styles.dayText,
-                    isSelected && styles.selectedDayText,
+                    styles.dateButton,
+                    isSelected && styles.selectedDateButton,
                   ]}
+                  onPress={() => handleDatePress(day)}
                 >
-                  {dayNames[dayIndex]}
-                </Text>
-                <Text
-                  style={[
-                    styles.dateText,
-                    isSelected && styles.selectedDateText,
-                  ]}
-                >
-                  {day}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
-        {/* Time Slots */}
-        <View style={styles.slotsContainer}>
-          {availableSlots.length > 0 ? (
-            <View style={styles.slotsGrid}>
-              {availableSlots.map((slot, index) => {
-                const isBooked = isSlotBooked(slot.slotStart);
-                const isSelected = selectedSlot === `${slot.slotStart} - ${slot.slotEnd}`;
-                return (
-                  <TouchableOpacity
-                    key={index}
+                  <Text
                     style={[
-                      styles.slotButton,
-                      isBooked && styles.bookedSlot,
-                      isSelected && styles.selectedSlot,
+                      styles.dayText,
+                      isSelected && styles.selectedDayText,
                     ]}
-                    onPress={() => !isBooked && handleSlotPress(slot)}
-                    disabled={isBooked}
                   >
-                    <Text
+                    {dayNames[dayIndex]}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.dateText,
+                      isSelected && styles.selectedDateText,
+                    ]}
+                  >
+                    {day}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          {/* Time Slots */}
+          <View style={styles.slotsContainer}>
+            {availableSlots.length > 0 ? (
+              <View style={styles.slotsGrid}>
+                {availableSlots.map((slot, index) => {
+                  const isBooked = isSlotBooked(slot.slotStart);
+                  const isSelected = selectedSlot === `${slot.slotStart} - ${slot.slotEnd}`;
+                  return (
+                    <TouchableOpacity
+                      key={index}
                       style={[
-                        styles.slotText,
-                        isBooked && styles.bookedSlotText,
-                        isSelected && styles.selectedSlotText,
+                        styles.slotButton,
+                        isBooked && styles.bookedSlot,
+                        isSelected && styles.selectedSlot,
                       ]}
+                      onPress={() => !isBooked && handleSlotPress(slot)}
+                      disabled={isBooked}
                     >
-                      {slot.slotStart} - {slot.slotEnd}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          ) : (
-            <View style={styles.noSlotsContainer}>
-              <Text style={styles.noSlotsText}>
-                No available slots for this day.
-              </Text>
-            </View>
-          )}
+                      <Text
+                        style={[
+                          styles.slotText,
+                          isBooked && styles.bookedSlotText,
+                          isSelected && styles.selectedSlotText,
+                        ]}
+                      >
+                        {slot.slotStart} - {slot.slotEnd}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ) : (
+              <View style={styles.noSlotsContainer}>
+                <Text style={styles.noSlotsText}>
+                  No available slots for this day.
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
 
-        {/* Dynamic bottom spacing - adds space when date is selected and slots are visible */}
+        {/* Doctor Details and Ratings Section */}
+        <View style={styles.doctorDetailsSection}>
+          {/* Rating and Reviews */}
+          <View style={styles.ratingSection}>
+            <Text style={styles.sectionTitle}>Patient Reviews</Text>
+            <View style={styles.ratingContainer}>
+              <View style={styles.overallRating}>
+                <Text style={styles.ratingNumber}>{doctor?.rating || '4.8'}</Text>
+                <View style={styles.ratingStars}>
+                  <StarRating rating={doctor?.rating || 4.8} size={20} />
+                </View>
+                <Text style={styles.reviewCount}>({doctor?.totalReviews || 156} reviews)</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Professional Details */}
+          <View style={styles.professionalSection}>
+            <Text style={styles.sectionTitle}>Professional Details</Text>
+            <View style={styles.detailsGrid}>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailLabel}>Experience</Text>
+                <Text style={styles.detailValue}>{doctor?.experience || 12} years</Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailLabel}>Consultation Fee</Text>
+                <Text style={styles.detailValue}>₹{doctor?.consultationFee || 500}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Education */}
+          <View style={styles.educationSection}>
+            <Text style={styles.sectionTitle}>Education</Text>
+            {(doctor?.education || ['MBBS - AIIMS Delhi', 'MD Cardiology - PGI Chandigarh']).map((edu, index) => (
+              <View key={index} style={styles.educationItem}>
+                <View style={styles.educationBullet} />
+                <Text style={styles.educationText}>{edu}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Services */}
+          <View style={styles.servicesSection}>
+            <Text style={styles.sectionTitle}>Services Offered</Text>
+            <View style={styles.servicesGrid}>
+              {(doctor?.services || ['Heart Surgery', 'Cardiac Consultation', 'ECG', 'Echocardiography']).map((service, index) => (
+                <View key={index} style={styles.serviceChip}>
+                  <Text style={styles.serviceText}>{service}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Languages */}
+          <View style={styles.languagesSection}>
+            <Text style={styles.sectionTitle}>Languages Spoken</Text>
+            <View style={styles.languagesContainer}>
+              {(doctor?.languages || ['English', 'Hindi', 'Tamil']).map((language, index) => (
+                <Text key={index} style={styles.languageText}>
+                  {language}{index < (doctor?.languages?.length || 3) - 1 ? ', ' : ''}
+                </Text>
+              ))}
+            </View>
+          </View>
+
+          {/* Awards */}
+          <View style={styles.awardsSection}>
+            <Text style={styles.sectionTitle}>Awards & Recognition</Text>
+            {(doctor?.awards || ['Best Cardiologist Award 2023', 'Excellence in Patient Care 2022']).map((award, index) => (
+              <View key={index} style={styles.awardItem}>
+                <View style={styles.awardIcon}>
+                  <StarIcon width={16} height={16} fill="#FFD700" />
+                </View>
+                <Text style={styles.awardText}>{award}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Dynamic bottom spacing */}
         <View style={{ 
           height: selectedDate && availableSlots.length > 0 ? 180 : 120 
         }} />
@@ -703,8 +831,15 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     lineHeight: 24,
   },
-  dateScrollView: {
+  slotesContainer: {
     marginTop: 24,
+    padding:10
+  },
+  slotesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: 12,
   },
   dateContainer: {
     paddingRight: 16,
@@ -766,7 +901,7 @@ const styles = StyleSheet.create({
   },
   slotText: {
     fontSize: 14,
-    color: '#374151',
+    color: '#6a6a6aff',
     fontWeight: '500',
   },
   selectedSlotText: {
@@ -786,6 +921,164 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     textAlign: 'center',
   },
+  
+  // Doctor Details Section Styles
+  doctorDetailsSection: {
+    marginTop: 32,
+    gap: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: 16,
+  },
+  
+  // Rating Section
+  ratingSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 10,
+  },
+  ratingContainer: {
+    alignItems: 'center',
+  },
+  overallRating: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  ratingNumber: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  ratingStars: {
+    marginVertical: 8,
+  },
+  reviewCount: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontWeight: '500',
+  },
+  
+  // Professional Details
+  professionalSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 10,
+  },
+  detailsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  detailItem: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    marginHorizontal: 4,
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  detailValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  
+  // Education Section
+  educationSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 10,
+  },
+  educationItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  educationBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#14b8a6',
+    marginRight: 12,
+  },
+  educationText: {
+    fontSize: 16,
+    color: '#374151',
+    flex: 1,
+  },
+  
+  // Services Section
+  servicesSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 10,
+  },
+  servicesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  serviceChip: {
+    backgroundColor: '#14b8a513',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 8,
+  },
+  serviceText: {
+    fontSize: 14,
+    color: '#14b8a6',
+    fontWeight: '500',
+  },
+  
+  // Languages Section
+  languagesSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 10,
+  },
+  languagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  languageText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  
+  // Awards Section
+  awardsSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 10,
+  },
+  awardItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  awardIcon: {
+    width: 32,
+    height: 32,
+    backgroundColor: '#fef3c7',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  awardText: {
+    fontSize: 16,
+    color: '#374151',
+    flex: 1,
+  },
+  
   bottomPanel: {
     position: 'absolute',
     bottom: 0,

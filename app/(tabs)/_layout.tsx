@@ -60,15 +60,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <ExploreIcon width={24} height={24} fill={color} />,
-          tabBarLabelStyle: { fontSize: 12 },
-        }}
-      />
-      <Tabs.Screen
-        name="appointments"
+        name="bookedAppointments"
         options={{
           title: 'Appointments',
           tabBarIcon: ({ color }) => <CalendarIcon width={24} height={24} fill={color} />,
